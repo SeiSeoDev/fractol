@@ -26,6 +26,9 @@ typedef struct		s_list
     void *mlx_ptr;
     void *mlx_win;
     char *test_text;
+	int mousex;
+	int mousey;
+	int test;
     t_img		*mlx_img;
 
 }			data_str;

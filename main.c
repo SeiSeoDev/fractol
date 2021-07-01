@@ -138,10 +138,11 @@ void print_fract(data_str *data_strct)
         int i;
         for( iY = 0;iY<iYmax;iY++)
         {
-            Cy = iY / (float)iYmax * (4) * data_strct->mlx_img->ZOOM + CyMin;
+            Cy = (iY / (float)iYmax * (CyMax - CyMin) + CyMin + data_strct->mlx_img->START_Y);
+            Cy = (Cy - (data_strct->mousey/(float)iYmax * (CyMax - CyMin) + CyMin))* data_strct->mlx_img->ZOOM - (data_strct->mousey/(float)iYmax * (CyMax - CyMin) + CyMin); 
              for(iX=0;iX<iXmax;iX++)
              {       
-                 Cx = iX / (float)iXmax * (7) * data_strct->mlx_img->ZOOM + CxMin;
+                 Cx = iX / (float)iXmax * (7)  + CxMin + data_strct->mlx_img->START_X;
                         px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
             }
         }
@@ -149,31 +150,46 @@ void print_fract(data_str *data_strct)
 
 }
 
+int keyboard_hook(int keycode,data_str *data_strct)
+{
+    printf("%d\n", keycode);
+    if(keycode == 124)
+    {
+        data_strct->mlx_img->START_X += 1;
+    }
+
+    print_fract(data_strct);
+    return 1;
+}
+
 int mouse_hook(int button,int x,int y,data_str *data_strct){
     printf("button : %d | x : %d | y : %d\n", button, x, y);
     printf("startX : %f | startY : %f\n", data_strct->mlx_img->START_X, data_strct->mlx_img->START_Y);
     if (button == 4)
         {
-        data_strct->mlx_img->ZOOM += 1;
-        data_strct->mlx_img->START_Y = 1.5 * (x - data_strct->size_x / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_x) + 1080;
-        data_strct->mlx_img->START_X = (y - data_strct->size_y / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_y) + 1920;
-
+        data_strct->mlx_img->ZOOM *= 1.1;
+        // data_strct->mlx_img->START_Y += (y / data_strct->size_y) / data_strct->mlx_img->ZOOM;
+        // data_strct->mlx_img->START_X += (x / data_strct->size_x) / data_strct->mlx_img->ZOOM;
+        data_strct->mousex = x;
+        data_strct->mousey = y;
         }
     if (button == 5)
     {
-        data_strct->mlx_img->ZOOM -= 0.1;
+        data_strct->mlx_img->ZOOM /= 1.1;
+        data_strct->mousex = x;
+        data_strct->mousey = y;
        // data_strct->mlx_img->START_X = x;
         //data_strct->mlx_img->START_Y = y;
     }
     if (button == 1)
     {
-        data_strct->mlx_img->START_X = 1.5 * (x - data_strct->size_x / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_x);
-        data_strct->mlx_img->START_Y = (y - data_strct->size_y / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_y);
+        data_strct->test += 1;
         
     }
     print_fract(data_strct);
     return (1);
 }
+
 int main()
 {
     data_str *data_strct;
@@ -190,6 +206,8 @@ int main()
     data_strct->mlx_img->START_X = 0;
     data_strct->mlx_img->START_Y = 0.0;
     data_strct->mlx_img->ZOOM = 0.8;
+    data_strct->mousex = 1;
+    data_strct->mousey = 1;
     data_strct->mlx_ptr = mlx_init();
     data_strct->mlx_win = mlx_new_window(data_strct->mlx_ptr, data_strct->size_x, data_strct->size_y, "new Window");
     //px_put(data_strct, 9845840);
@@ -224,6 +242,7 @@ int main()
     //printf("%s\n", str);
     //printf("%lu\n", strlen(str)); 
     mlx_mouse_hook(data_strct->mlx_win, mouse_hook, data_strct);
+    mlx_key_hook(data_strct->mlx_win, keyboard_hook, data_strct);
     mlx_loop(data_strct->mlx_ptr);
     return (1);
 }
