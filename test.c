@@ -151,3 +151,35 @@ int main(void) {
         }
 stop = clock();
     mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);
+
+
+
+
+/*
+    for (unsigned int y = 0; y < data_strct->size_y; ++y) {
+        double p_i = (y - data_strct->size_y / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_y) + data_strct->mlx_img->START_Y;
+        
+        // Pour chaque pixel en X
+        for (unsigned int x = 0; x < data_strct->size_x; ++x) {
+            double p_r = 1.5 * (x - data_strct->size_x / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_x) + data_strct->mlx_img->START_X;
+            double new_r = 0, new_i = 0, old_r = 0, old_i = 0;
+            unsigned int i = 0;
+
+            // Magie noir mathématique (merci Wikipedia)
+            while ((new_r * new_r + new_i * new_i) < 4.0 && i < 142) {
+                old_r = new_r;
+                old_i = new_i;
+                new_r = old_r * old_r - old_i * old_i + p_r;
+                new_i = 2.0 * old_r * old_i + p_i;
+                ++i;
+            }
+
+            // Dessine le pixel (avec conversion RGB565 -> RGB565)
+            unsigned int color = COLOR_TABLE[i];
+            data_strct->mlx_img->data[(1920 * y) + (x)] = color;
+        }
+        
+        // Sauvegarde la ligne de pixels dans le fichier PPM
+        }
+stop = clock();
+  */  mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);

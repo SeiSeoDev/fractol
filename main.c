@@ -1,11 +1,5 @@
 #include "mlx/mlx.h"
 #include "fractole.h"
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h> 
-#include <sys/stat.h>
-#include <fcntl.h>
-#include<time.h>
 
 void px_put(data_str *data_strct, int color)
 {
@@ -53,126 +47,106 @@ char *get_xpm(char *addr)
 return (text_data_strct);
 }
 
+void print_color(data_str *data_strct, unsigned char *color, int x, int y)
+{
+    /*char convert[] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'a', 'b', 'c', 'd', 'e', 'f', };
+    int cnt = 0;
+    char tmp[9];
+    char swap;
+    tmp[8] = 0;
+    tmp[0] = '0';
+    tmp[1] = 'x';
+    for (int i=0; i < 3; i++)
+    {    
+        tmp[2 * (i + 1)] = 0;
+        tmp[2 * (i + 1) + 1] = 0;
+        if (color[i] == 0)
+        {
+            tmp[2 + cnt++] = '0';
+            tmp[2 +cnt++] = '0';
+        }
+        while(color[i] > 0)
+        {
+            //data_strct->mlx_img->data[(1920 * y) + (x)] += color[i] % 16;
+            tmp[2+cnt++] = convert[color[i]%16];
+            color[i] /=  16;
+        }
+        if (cnt < 2*(i + 1))
+            tmp[cnt++] = '0';
+        swap = tmp[2 * (i+ 1)];
+        tmp[2*(i + 1)] = tmp[2*(i + 1)+1];
+        tmp[2* (i + 1)+1] = swap;
+    }*/
+    *(int *)(data_strct->mlx_img->data + ((y * 1920 + x) * data_strct->mlx_img->bpp/32))= color[0] * 256 *256 + color[1] * 256 + color[2];
+    //my_mlx_pixel_put(data_strct->mlx_img, x, y, "0xFFFFFF");
+    //printf("%s ||", tmp);
+  //  printf("%d\n", data_strct->mlx_img->data[(1920 * y) + (x)]);
+}
+t_hsv mandelbrot(t_complex z, t_complex c, data_str *data_strct, int iteration_max)
+{
+    int i;
+    t_hsv color;
+    i = 0;
 
+    for (i = 0; i < iteration_max && get_complex_size(z) < 4; i++)
+    {
+        z = add_comp(square_comp(z), c);
+    }
+
+    if (i == iteration_max)
+    {
+        color.h = 0;
+        color.s = 0;
+        color.v = 0;
+        return (color);
+    }
+    color.h = 50;
+    color.s = 50+i/5;                   
+    color.v = i;
+    return (color);
+
+}
 void print_fract(data_str *data_strct)
 {
         clock_t start, stop;
        // Tableau temporaire pour une ligne de pixels
     unsigned char line_buffer[data_strct->size_x * 3];
-    const unsigned int COLOR_TABLE[] = {
-    0xf7df, 0xff5a, 0x07ff, 0x7ffa, 0xf7ff, 0xf7bb, 0xff38, 0xff59, 0x001f, 0x895c, 
-    0xa145, 0xddd0, 0x5cf4, 0x7fe0, 0xd343, 0xfbea, 0x64bd, 0xffdb, 0xd8a7, 0x07ff, 
-    0x0011, 0x0451, 0xbc21, 0xad55, 0x0320, 0xbdad, 0x8811, 0x5345, 0xfc60, 0x9999, 
-    0x8800, 0xecaf, 0x8df1, 0x49f1, 0x2a69, 0x067a, 0x901a, 0xf8b2, 0x05ff, 0x6b4d, 
-    0x1c9f, 0xd48e, 0xb104, 0xffde, 0x2444, 0xf81f, 0xdefb, 0xffdf, 0xfea0, 0xdd24, 
-    0x8410, 0x0400, 0xafe5, 0xf7fe, 0xfb56, 0xcaeb, 0x4810, 0xfffe, 0xf731, 0xe73f, 
-    0xff9e, 0x7fe0, 0xffd9, 0xaedc, 0xf410, 0xe7ff, 0xffda, 0xd69a, 0x9772, 0xfdb8, 
-    0xfd0f, 0x2595, 0x867f, 0x839f, 0x7453, 0xb63b, 0xfffc, 0x07e0, 0x3666, 0xff9c, 
-    0xf81f, 0x8000, 0x6675, 0x0019, 0xbaba, 0x939b, 0x3d8e, 0x7b5d, 0x07d3, 0x4e99, 
-    0xc0b0, 0x18ce, 0xf7ff, 0xff3c, 0xff36, 0xfef5, 0x0010, 0xffbc, 0x8400, 0x6c64, 
-    0xfd20, 0xfa20, 0xdb9a, 0xef55, 0x9fd3, 0xaf7d, 0xdb92, 0xff7a, 0xfed7, 0xcc27, 
-    0xfe19, 0xdd1b, 0xb71c, 0x8010, 0xf800, 0xbc71, 0x435c, 0x8a22, 0xfc0e, 0xf52c, 
-    0x2c4a, 0xffbd, 0xa285, 0xc618, 0x867d, 0x6ad9, 0x7412, 0xffdf, 0x07ef, 0x4416, 
-    0xd5b1, 0x0410, 0xddfb, 0xfb08, 0x471a, 0xec1d, 0xd112, 0xf6f6, 0xffff, 0xf7be, 
-    0xffe0, 0x9e66, 0x0000
-};
 
-    // Pour chaque pixel en Y
-    start = clock();
-    // int x, y, i;
-    // double x2, y2, new_x, new_y, c, v;
+        unsigned char color[3];
+        double mx, my, x, y, x2, y2;
 
-    // x = 0;
-    // while (y < data_strct->size_x)
-    // {
-    //     x = 0;
-    //     y2 = (2/data_strct->size_x) * y - 1 + data_strct->mlx_img->START_Y * (2/data_strct->size_x) - 1;
-    //     while (x < data_strct->size_y)
-    //     { 
-    //         x2 = (3.5/data_strct->size_y) * x - 1 + data_strct->mlx_img->START_X * (3.5/data_strct->size_y) - 1;
-    //         i = 142;
-    //         c = 0;
-    //         v = 0;
-    //         while (i > 0 && c * c + v * v <= 2*2)
-    //         {
-    //             new_x = c*c-v*v + x2;
-    //             v = 2*c*v + y2;
-    //             c = new_x;
-    //             i--;
-    //         }
-    //         data_strct->mlx_img->data[y * 1920 + x] =  COLOR_TABLE[142 - i];
-    //         x++;
-    //     }
-    //     y++;
-    // }
-        for (unsigned int y = 0; y < data_strct->size_y; ++y) {
-        double p_i = (y - data_strct->size_y / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_y) + data_strct->mlx_img->START_Y;
-        
-        // Pour chaque pixel en X
-        for (unsigned int x = 0; x < data_strct->size_x; ++x) {
-            double p_r = 1.5 * (x - data_strct->size_x / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_x) + data_strct->mlx_img->START_X;
-            double new_r = 0, new_i = 0, old_r = 0, old_i = 0;
-            unsigned int i = 0;
-            while ((new_r * new_r + new_i * new_i) < 4.0 && i < 142) {
-                old_r = new_r;
-                old_i = new_i;
-                new_r = old_r * old_r - old_i * old_i + p_r;
-                new_i = 2.0 * old_r * old_i + p_i;
-                ++i;
+        /* world ( double) coordinate = parameter plane*/
+        double Cx,Cy;
+        const double CxMin= -4;
+        const double CxMax= 3;
+        const double CyMin= -2.0;
+        const double CyMax= 2.0;
+        int iX,iY;
+        t_hsv hsv;
+        hsv.s = 71;
+        hsv.v = 90;
+        double Zx, Zy;
+        const int iXmax = 1920; 
+        const int iYmax = 1080;
+        double Zx2, Zy2; 
+        int Iteration;
+        const int IterationMax=100;
+        const double EscapeRadius=2;
+        double ER2=EscapeRadius*EscapeRadius;
+                double PixelWidth=(CxMax-CxMin)/iXmax;
+        double PixelHeight=(CyMax-CyMin)/iYmax;
+        int i;
+        for( iY = 0;iY<iYmax;iY++)
+        {
+            Cy = iY / (float)iYmax * (4) * data_strct->mlx_img->ZOOM + CyMin;
+             for(iX=0;iX<iXmax;iX++)
+             {       
+                 Cx = iX / (float)iXmax * (7) * data_strct->mlx_img->ZOOM + CxMin;
+                        px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
             }
-
-            // Dessine le pixel (avec conversion RGB565 -> RGB565)
-            unsigned int color = COLOR_TABLE[i];
-            data_strct->mlx_img->data[(1920 * y) + (x)] = color;
         }
-   //             printf("tests : %f", p_i);
-        // Sauvegarde la ligne de pixels dans le fichier PPM
-        }
-// for each pixel (Px, Py) on the screen do
-//     x0 := scaled x coordinate of pixel (scaled to lie in the Mandelbrot X scale (-2.5, 1))
-//     y0 := scaled y coordinate of pixel (scaled to lie in the Mandelbrot Y scale (-1, 1))
-//     x := 0.0
-//     y := 0.0
-//     iteration := 0
-//     max_iteration := 1000
-//     while (x*x + y*y ≤ 2*2 AND iteration < max_iteration) do
-//         xtemp := x*x - y*y + x0
-//         y := 2*x*y + y0
-//         x := xtemp
-//         iteration := iteration + 1
- 
-//     color := palette[iteration]
-//     plot(Px, Py, color)
-/*
-    for (unsigned int y = 0; y < data_strct->size_y; ++y) {
-        double p_i = (y - data_strct->size_y / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_y) + data_strct->mlx_img->START_Y;
-        
-        // Pour chaque pixel en X
-        for (unsigned int x = 0; x < data_strct->size_x; ++x) {
-            double p_r = 1.5 * (x - data_strct->size_x / 2.0) / (0.5 * data_strct->mlx_img->ZOOM * data_strct->size_x) + data_strct->mlx_img->START_X;
-            double new_r = 0, new_i = 0, old_r = 0, old_i = 0;
-            unsigned int i = 0;
+        mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);
 
-            // Magie noir mathématique (merci Wikipedia)
-            while ((new_r * new_r + new_i * new_i) < 4.0 && i < 142) {
-                old_r = new_r;
-                old_i = new_i;
-                new_r = old_r * old_r - old_i * old_i + p_r;
-                new_i = 2.0 * old_r * old_i + p_i;
-                ++i;
-            }
-
-            // Dessine le pixel (avec conversion RGB565 -> RGB565)
-            unsigned int color = COLOR_TABLE[i];
-            data_strct->mlx_img->data[(1920 * y) + (x)] = color;
-        }
-        
-        // Sauvegarde la ligne de pixels dans le fichier PPM
-        }
-stop = clock();
-  */  mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);
-
- //   printf("temps d execution en sec %lu\n", (stop - start)*1000/CLOCKS_PER_SEC);
 }
 
 int mouse_hook(int button,int x,int y,data_str *data_strct){
@@ -220,8 +194,9 @@ int main()
     data_strct->mlx_win = mlx_new_window(data_strct->mlx_ptr, data_strct->size_x, data_strct->size_y, "new Window");
     //px_put(data_strct, 9845840);
     data_strct->mlx_img->img_ptr = mlx_new_image(data_strct->mlx_ptr , data_strct->size_x, data_strct->size_y);
-    data_strct->mlx_img->data = (int *)mlx_get_data_addr(data_strct->mlx_img->img_ptr, &data_strct->mlx_img->bpp, &data_strct->mlx_img->size_l,
+    data_strct->mlx_img->data = (char *)mlx_get_data_addr(data_strct->mlx_img->img_ptr, &data_strct->mlx_img->bpp, &data_strct->mlx_img->size_l,
 		&data_strct->mlx_img->endian);
+    printf("bpp %d, size %d\n", data_strct->mlx_img->bpp, data_strct->mlx_img->size_l);
     /*while (++count_h < 1080)
 	{
 		count_w = -1;
