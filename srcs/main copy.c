@@ -141,9 +141,9 @@ void print_fract(data_str *data_strct)
             Cy = (iY / (float)iYmax * (CyMax - CyMin) + CyMin + data_strct->mlx_img->START_Y);
             Cy = (Cy - (data_strct->mousey/(float)iYmax * (CyMax - CyMin) + CyMin))* data_strct->mlx_img->ZOOM - (data_strct->mousey/(float)iYmax * (CyMax - CyMin) + CyMin); 
              for(iX=0;iX<iXmax;iX++)
-             {       
-                 Cx = iX / (float)iXmax * (7)  + CxMin + data_strct->mlx_img->START_X;
-                        px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
+            {       
+                Cx = iX / (float)iXmax * (7)  + CxMin + data_strct->mlx_img->START_X;
+                px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
             }
         }
         mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);

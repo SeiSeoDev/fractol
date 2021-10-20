@@ -112,23 +112,30 @@ void print_fract(data_str *data_strct)
     double vx, vy;
 
     y = 0;
-
+    /*clock_t stop;
+    stop = clock();
+	printf("start : %d\n", (int)stop);
+    */
     while(y < data_strct->size_y)
     {
         x = 0;
         vy =  ((2*((y + 0.5) / data_strct->size_y))-1)+ data_strct->mlx_img->START_Y;//data_strct->mlx_img->START_Y
      //   Cy = (iY / (float)iYmax * (CyMax - CyMin) + CyMin + data_strct->mlx_img->START_Y);
-
+            
         while(x < data_strct->size_x)
         {
             //printf("%f %f\n", vy, vx);
             vx = ((3.5 * ((x + 0.5) / data_strct->size_x)) - 2.5) + data_strct->mlx_img->START_X; // + data_strct->mlx_img->START_X
             //printf("x: %f, y: %f\n", vx, vy);
+            	int			result;
+	        
             px_to_onscreenimg(data_strct, x, y, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(vx, vy), data_strct, data_strct->iteration_max)));
             x++;
         }
         y++;
-    }
+    }/*
+    stop = clock();
+	printf("stop : %d\n", (int)stop);*/
     //px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
     mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);
 }
@@ -193,7 +200,7 @@ int main()
     data_strct->yval_min = -1.0;
     data_strct->xval_max = 2.0;
     data_strct->xval_min = -2.0;
-    data_strct->iteration_max = 100;
+    data_strct->iteration_max = 10;
     data_strct->mlx_ptr = mlx_init();
     data_strct->mlx_win = mlx_new_window(data_strct->mlx_ptr, data_strct->size_x, data_strct->size_y, "new Window");
     //px_put(data_strct, 9845840);

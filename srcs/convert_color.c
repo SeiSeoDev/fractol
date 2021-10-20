@@ -7,6 +7,7 @@ int	get_rgb(unsigned char r, unsigned char g, unsigned char b)
 	result = r;
 	result = (result << 8) + g;
 	result = (result << 8) + b;
+	
 	return (result);
 }
 int	rgb_to_int(t_rgb rgb)
@@ -25,6 +26,7 @@ t_rgb			int_to_rgb(int c)
 
 int	hsv_to_rgb(t_hsv hsv)
 {
+
 	float	c;
 	float	h;
 	float	x;
@@ -35,16 +37,16 @@ int	hsv_to_rgb(t_hsv hsv)
 	x = c * (1 - fabsf(h - ((int)h / 2 * 2) - 1));
 	m = (float)hsv.v / 100 - c;
 	if (h >= 0 && h < 1)
-		return (get_rgb(round((c + m) * 255), round((x + m) * 255), round(m * 255)));
+		return (get_rgb((c + m) * 255, (x + m) * 255, m * 255));
 	if (h >= 1 && h < 2)
-		return (get_rgb(round((x + m) * 255), round((c + m) * 255), round(m * 255)));
+		return (get_rgb((x + m) * 255, (c + m) * 255, m * 255));
 	if (h >= 2 && h < 3)
-		return (get_rgb(round(m * 255), round((c + m) * 255), round((x + m) * 255)));
+		return (get_rgb(m * 255, (c + m) * 255, (x + m) * 255));
 	if (h >= 3 && h < 4)
-		return (get_rgb(round(m * 255), round((x + m) * 255), round((c + m) * 255)));
+		return (get_rgb(m * 255, (x + m) * 255, (c + m) * 255));
 	if (h >= 4 && h < 5)
-		return (get_rgb(round((x + m) * 255), round(m * 255), round((c + m) * 255)));
-	return (get_rgb(round((c + m) * 255), round(m * 255), round((x + m) * 255)));
+		return (get_rgb((x + m) * 255, m * 255, (c + m) * 255));
+	return (get_rgb((c + m) * 255, m * 255, (x + m) * 255));
 }
 
 void px_to_onscreenimg(data_str *data_strc , int x, int y, int c)
