@@ -112,20 +112,17 @@ void print_fract(data_str *data_strct)
     double vx, vy;
 
     y = 0;
-    /*clock_t stop;
-    stop = clock();
-	printf("start : %d\n", (int)stop);
-    */
+
     while(y < data_strct->size_y)
     {
         x = 0;
-        vy =  ((2*((y + 0.5) / data_strct->size_y))-1)+ data_strct->mlx_img->START_Y;//data_strct->mlx_img->START_Y
+        vy =  ((2*((y + 0.5) / data_strct->size_y))-1)* data_strct->mlx_img->ZOOM + data_strct->mlx_img->START_Y;//data_strct->mlx_img->START_Y
      //   Cy = (iY / (float)iYmax * (CyMax - CyMin) + CyMin + data_strct->mlx_img->START_Y);
             
         while(x < data_strct->size_x)
         {
             //printf("%f %f\n", vy, vx);
-            vx = ((3.5 * ((x + 0.5) / data_strct->size_x)) - 2.5) + data_strct->mlx_img->START_X; // + data_strct->mlx_img->START_X
+            vx = ((3.5 * ((x + 0.5) / data_strct->size_x)) - 2.5) * data_strct->mlx_img->ZOOM  + data_strct->mlx_img->START_X; // + data_strct->mlx_img->START_X
             //printf("x: %f, y: %f\n", vx, vy);
             	int			result;
 	        
@@ -133,19 +130,35 @@ void print_fract(data_str *data_strct)
             x++;
         }
         y++;
-    }/*
-    stop = clock();
-	printf("stop : %d\n", (int)stop);*/
+    }
     //px_to_onscreenimg(data_strct, iX, iY, hsv_to_rgb(mandelbrot(get_complex(0, 0), get_complex(Cx, Cy), data_strct, IterationMax))); 
     mlx_put_image_to_window(data_strct->mlx_ptr, data_strct->mlx_win, data_strct->mlx_img->img_ptr, 0, 0);
 }
 
 int keyboard_hook(int keycode,data_str *data_strct)
 {
+    double w, h;
+
+    w = (data_strct->xval_max - data_strct->xval_min) * data_strct->mlx_img->ZOOM;
+    h = (data_strct->yval_max - data_strct->yval_min) * data_strct->mlx_img->ZOOM;
+
     printf("%d\n", keycode);
     if(keycode == 65363)
     {
-        data_strct->mlx_img->START_X += 1;
+        printf("%f\n", w);
+        data_strct->mlx_img->START_X += w * 0.1;
+    }
+     if(keycode == 65361)
+    {
+        data_strct->mlx_img->START_X -= w * 0.1;
+    }
+     if(keycode == 65362)
+    {
+        data_strct->mlx_img->START_Y -= h * 0.1;
+    }
+     if(keycode == 65364)
+    {
+        data_strct->mlx_img->START_Y += h * 0.1;
     }
 
     print_fract(data_strct);
@@ -155,17 +168,25 @@ int keyboard_hook(int keycode,data_str *data_strct)
 int mouse_hook(int button,int x,int y,data_str *data_strct){
     printf("button : %d | x : %d | y : %d\n", button, x, y);
     printf("startX : %f | startY : %f\n", data_strct->mlx_img->START_X, data_strct->mlx_img->START_Y);
+    double w, h;
+    w = (data_strct->xval_max - data_strct->xval_min) * data_strct->mlx_img->ZOOM;
+    h = (data_strct->yval_max - data_strct->yval_min) * data_strct->mlx_img->ZOOM;
     if (button == 4)
         {
-        // data_strct->mlx_img->START_Y += (y / data_strct->size_y) / data_strct->mlx_img->ZOOM;
-        // data_strct->mlx_img->START_X += (x / data_strct->size_x) / data_strct->mlx_img->ZOOM;
+        data_strct->mlx_img->ZOOM *= 1.3;
+        data_strct->mlx_img->START_Y += (y / data_strct->size_y) / data_strct->mlx_img->ZOOM;
+        data_strct->mlx_img->START_X += (x / data_strct->size_x) / data_strct->mlx_img->ZOOM;
         data_strct->mousex = x;
         data_strct->mousey = y;
         }
     if (button == 5)
     {
+        data_strct->mlx_img->ZOOM *= 1 / 1.3;
         data_strct->mousex = x;
         data_strct->mousey = y;
+        data_strct->mlx_img->START_Y += (y / data_strct->size_y) / data_strct->mlx_img->ZOOM;
+        data_strct->mlx_img->START_X += (x / data_strct->size_x) / data_strct->mlx_img->ZOOM;
+
        // data_strct->mlx_img->START_X = x;
         //data_strct->mlx_img->START_Y = y;
     }
@@ -193,14 +214,14 @@ int main()
     data_strct->size_y = 1080;
     data_strct->mlx_img->START_X = 0;
     data_strct->mlx_img->START_Y = 0.0;
-    data_strct->mlx_img->ZOOM = 0.8;
+    data_strct->mlx_img->ZOOM = 1;
     data_strct->mousex = 1;
     data_strct->mousey = 1;
     data_strct->yval_max = 1.0;
-    data_strct->yval_min = -1.0;
-    data_strct->xval_max = 2.0;
+    data_strct->yval_min = -1;
+    data_strct->xval_max = 2;
     data_strct->xval_min = -2.0;
-    data_strct->iteration_max = 10;
+    data_strct->iteration_max = 100;
     data_strct->mlx_ptr = mlx_init();
     data_strct->mlx_win = mlx_new_window(data_strct->mlx_ptr, data_strct->size_x, data_strct->size_y, "new Window");
     //px_put(data_strct, 9845840);
