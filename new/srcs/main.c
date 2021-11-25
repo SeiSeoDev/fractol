@@ -101,7 +101,7 @@ t_hsv mandelbrot(t_complex z, t_complex c, data_str *env, int iteration_max)
         return (color);
     }
     color.h = 240;
-    color.s = i;                
+    color.s = i*3;                
     color.v = 100;
     return (color);
 
@@ -207,7 +207,7 @@ void print_fract(data_str *env)
              for(iX=0;iX<env->size_x;iX++)
              {       
                  Cx = pix_calc(env, iX, 'x');
-                        px_to_onscreenimg(env, iX, iY, hsv_to_rgb(julia(get_complex(Cx, Cy), get_complex(Cx, Cy), env, env->iterations)));
+                        px_to_onscreenimg(env, iX, iY, hsv_to_rgb(mandelbrot(get_complex(Cx, Cy), get_complex(Cx, Cy), env, env->iterations)));
             }
         }
         mlx_put_image_to_window(env->mlx_ptr, env->mlx_win, env->mlx_img->img_ptr, 0, 0);
@@ -236,7 +236,7 @@ int mouse_hook(int button,int x,int y,data_str *env){
         {
         env->mlx_img->START_X = pix_calc(env, x, 'x');
 		env->mlx_img->START_Y = pix_calc(env, y, 'y');
-        env->mlx_img->ZOOM *= ( env->mlx_img->ZOOM);
+        env->mlx_img->ZOOM *= ( 0.9);
         // env->mlx_img->START_Y += (y / env->size_y) / env->mlx_img->ZOOM;
         // env->mlx_img->START_X += (x / env->size_x) / env->mlx_img->ZOOM;
         printf("%f\n", env->mlx_img->ZOOM);
